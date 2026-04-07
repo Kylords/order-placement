@@ -1,24 +1,45 @@
-# README
+# My API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A simple Rails API for managing users, products, and orders.
 
-Things you may want to cover:
+---
 
-* Ruby version
+## 🛠 Prerequisites
 
-* System dependencies
+- **Ruby:** 2.7.8  
+- **Rails:** 5.2.8.1  
+- **Database:** PostgreSQL 14+ (or your preferred DB)
 
-* Configuration
+---
 
-* Database creation
+## ⚡ Setup Instructions
 
-* Database initialization
+1. **Clone the repository:**
 
-* How to run the test suite
+git clone https://github.com/Kylords/order-placement.git
+cd order-placement
 
-* Services (job queues, cache servers, search engines, etc.)
 
-* Deployment instructions
+2. **Install dependencies:**
 
-* ...
+bundle install
+
+
+3. **Setup the database:**
+
+rails db:create
+rails db:migrate
+
+
+4. **Run the server:**
+
+rails s
+
+
+OTHERS:
+
+To create an admin:
+- Create a normal user using the frontend
+- Promote the user via Rails console: **User.last.update!(role: 'admin')**
+
+
