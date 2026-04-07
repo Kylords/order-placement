@@ -21,7 +21,16 @@ module Api
         total_count = current_user.role == 'admin' ? Order.count : current_user.orders.count
 
         render json: {
-          orders: @orders.as_json(include: { order_items: { include: :product } }),
+          data: @orders.map do |order|
+            order.as_json.except('order_items').merge(
+              items: order.order_items.map do |item|
+                item.as_json.merge(
+                  product: item.product.as_json,
+                  subtotal: item.price * item.quantity
+                )
+              end
+            )
+          end,
           meta: {
             page: page,
             per_page: per_page,
@@ -34,12 +43,12 @@ module Api
       # POST /api/v1/orders
       def create
         items_data = params[:items] || []
-
+      
         Order.transaction do
           total_amount = 0
-
+      
           order_items_attributes = items_data.map do |item|
-            product = Product.find(item[:product_id]) # use find to raise error
+            product = Product.find(item[:product_id])
       
             quantity = item[:quantity].to_i
             price = product.price
@@ -51,7 +60,7 @@ module Api
               price: price
             }
           end
-
+      
           @order = Order.new(
             user: current_user,
             status: "pending",
@@ -59,11 +68,26 @@ module Api
             order_items_attributes: order_items_attributes
           )
       
-          @order.save!  # IMPORTANT: use bang (!) to trigger rollback
+          @order.save!
       
-          render json: @order.as_json(include: { order_items: { include: :product } }), status: :created
+          render json: {
+            message: "Order created successfully",
+            data: {
+              id: @order.id,
+              status: @order.status,
+              total_amount: @order.total_amount.to_f,
+              items: @order.order_items.map do |item|
+                {
+                  product_id: item.product_id,
+                  quantity: item.quantity,
+                  price: item.price.to_f,
+                  subtotal: (item.price * item.quantity).to_f
+                }
+              end
+            }
+          }, status: :created
         end
-
+      
       rescue ActiveRecord::RecordNotFound => e
         render json: { errors: [e.message] }, status: :unprocessable_entity
       
