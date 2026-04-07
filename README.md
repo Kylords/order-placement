@@ -1,6 +1,6 @@
 # My API
 
-A simple Rails API for managing users, products, and orders.
+A simple Rails API for order placement
 
 ---
 
